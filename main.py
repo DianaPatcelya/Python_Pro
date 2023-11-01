@@ -39,7 +39,7 @@ def space():
     if number is not None:
         return f'Number of astronauts: {number}'
 
-    return 'Поле "number" не знайдено у відповіді з сервера'
+    return '"number" не знайдено у відповіді з сервера'
 
 
 if __name__ == '__main__':
