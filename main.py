@@ -1,7 +1,9 @@
 from flask import Flask, request
-from utils import generate_requirements, gen_users, space_utils
+from utils import generate_requirements, gen_users, space_utils, commit_sql
+from create_table import create_table
 
 app = Flask(__name__)
+create_table()
 
 
 @app.route("/requirements")
@@ -40,6 +42,67 @@ def space():
         return f'Number of astronauts: {number}'
 
     return '"number" не знайдено у відповіді з сервера'
+
+
+@app.route('/phones/create/')
+def phones_create():
+    contact_name = request.args.get('contactName', 'Unknown')
+    phone_value = request.args.get('phone', 'a')
+
+    sql = f"""
+    INSERT INTO Phones (contactName, phoneValue)
+    VALUES ('{contact_name}', '{phone_value}');
+    """
+    commit_sql(sql)
+
+    return 'phones_create'
+
+
+@app.route('/phones/read')
+def phones_read():
+    import sqlite3
+    con = sqlite3.connect('example.db')
+    cur = con.cursor()
+
+    sql = """
+    SELECT * FROM Phones;
+    """
+    cur.execute(sql)
+
+    result = cur.fetchall()
+    con.close()
+
+    return result
+
+
+@app.route('/phones/update/')
+def phones_update():
+    contact_name = request.args.get('contactName', 'Unknown')
+    phone_value = request.args.get('phone')
+
+    phone_id = request.args.get('id')
+
+    sql = f"""
+    UPDATE Phones
+    SET contactName = '{contact_name}', phoneValue = '{phone_value}'
+    WHERE phoneID = {phone_id};
+    """
+    commit_sql(sql)
+
+    return 'phones_update'
+
+
+@app.route('/phones/delete/')
+def phones_delete():
+    phone_id = request.args.get('id')
+
+    sql = f"""
+    DELETE FROM Phones
+    WHERE phoneID = {phone_id};
+    """
+    commit_sql(sql)
+
+    return 'phones_delete'
 
 
 if __name__ == '__main__':
